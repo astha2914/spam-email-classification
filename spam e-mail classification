@@ -1,0 +1,58 @@
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Sample dataset: Replace with a proper dataset
+data = {
+    "email": [
+        "Win a $1000 gift card now!",
+        "Limited time offer for a free trial",
+        "Meeting scheduled for tomorrow at 10 AM",
+        "Get cheap meds online now",
+        "Please review the attached document and reply",
+        "Congratulations! You've been selected as a winner!",
+        "Report submission deadline extended",
+    ],
+    "label": ["spam", "spam", "ham", "spam", "ham", "spam", "ham"],  # 'spam' or 'ham'
+}
+
+# Load data into a DataFrame
+df = pd.DataFrame(data)
+
+# Splitting dataset into features (X) and labels (y)
+X = df["email"]
+y = df["label"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build a pipeline for text processing and classification
+pipeline = Pipeline([
+    ('vectorizer', CountVectorizer()),  # Converts text to a bag-of-words representation
+    ('tfidf', TfidfTransformer()),     # Applies TF-IDF weighting
+    ('classifier', MultinomialNB()),   # Naive Bayes classifier
+])
+
+# Train the model
+pipeline.fit(X_train, y_train)
+
+# Make predictions
+y_pred = pipeline.predict(X_test)
+
+# Evaluate the model
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Testing with new emails
+new_emails = [
+    "You have won a free cruise!",
+    "Project deadline is extended to next week",
+]
+predictions = pipeline.predict(new_emails)
+print("\nNew Emails Classification:")
+for email, label in zip(new_emails, predictions):
+    print(f"{email} -> {label}")
